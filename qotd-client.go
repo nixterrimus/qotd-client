@@ -18,7 +18,11 @@ func main() {
 	}
 
 	app.Action = func(c *cli.Context) {
-		if len(c.Args()) != 2 {
+    if (len(c.Args()) == 0) {
+      fmt.Println("Resolving server address with MDNS")
+      fmt.Println("someday")
+      os.Exit(0)
+    } else if len(c.Args()) != 2 {
 			fmt.Println("Usage <host> <port>")
 			os.Exit(1)
 		}
