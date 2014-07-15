@@ -22,7 +22,15 @@ func main() {
 			fmt.Println("Client requires <host> <port>")
 			os.Exit(1)
 		}
-		message := connectOverTCP(c.Args()[0] + ":" + c.Args()[1])
+		udp := c.Bool("udp")
+		tcp := c.Bool("tcp") || (!udp)
+
+		var message = ""
+		if tcp {
+			message = connectOverTCP(c.Args()[0] + ":" + c.Args()[1])
+		} else {
+			message = "UDP isn't supported, yet"
+		}
 		fmt.Println(message)
 	}
 	app.Run(os.Args)
