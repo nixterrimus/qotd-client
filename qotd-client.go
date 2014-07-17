@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/codegangsta/cli"
+  "github.com/armon/mdns"
 )
 
 func main() {
@@ -18,17 +19,32 @@ func main() {
 	}
 
 	app.Action = func(c *cli.Context) {
+    serverAddress := ""
     if (len(c.Args()) == 0) {
-      fmt.Println("Resolving server address with MDNS")
-      fmt.Println("someday")
+      entriesCh := make(chan *mdns.ServiceEntry, 4)
+      go func() string {
+        for entry := range entriesCh {
+          str := fmt.Sprintf("%v:%v", entry, entry.Port)
+          fmt.Println(str)
+          return str
+        }
+        return "Test and go"
+      }()
+      addrs, _ := net.LookupIP("nox.local")
+      fmt.Println(addrs[1])
+      str := mdns.Lookup("_qotd._tcp", entriesCh)
+      fmt.Println(str)
+      close(entriesCh)
       os.Exit(0)
-    } else if len(c.Args()) != 2 {
+    } else if len(c.Args()) == 2 {
+      serverAddress = c.Args()[0] + ":" + c.Args()[1]
+		} else {
 			fmt.Println("Usage <host> <port>")
 			os.Exit(1)
-		}
+    }
+
 		udp := c.Bool("udp")
 		tcp := c.Bool("tcp") || (!udp)
-		serverAddress := c.Args()[0] + ":" + c.Args()[1]
 
 		var message = ""
 		if tcp {
