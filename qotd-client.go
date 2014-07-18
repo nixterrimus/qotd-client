@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net"
 	"os"
+  "strings"
 
 	"github.com/codegangsta/cli"
   "github.com/armon/mdns"
@@ -24,16 +25,20 @@ func main() {
       entriesCh := make(chan *mdns.ServiceEntry, 4)
       go func() string {
         for entry := range entriesCh {
-          str := fmt.Sprintf("%v:%v", entry, entry.Port)
-          fmt.Println(str)
-          return str
+          hostname := strings.Split(entry.Name, ".")[0] + ".local"
+          addrs, _ := net.LookupIP(hostname)
+          for addr := range addrs {
+            ip := addrs[addr]
+            if ip.To4() != nil { 
+              str := fmt.Sprintf("%v:%v", ip, entry.Port)
+              fmt.Println(str)
+            }
+          }
         }
         return "Test and go"
       }()
-      addrs, _ := net.LookupIP("nox.local")
-      fmt.Println(addrs[1])
-      str := mdns.Lookup("_qotd._tcp", entriesCh)
-      fmt.Println(str)
+
+      mdns.Lookup("_qotd._tcp", entriesCh)
       close(entriesCh)
       os.Exit(0)
     } else if len(c.Args()) == 2 {
