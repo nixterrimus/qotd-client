@@ -40,6 +40,7 @@ func main() {
 
       mdns.Lookup("_qotd._tcp", entriesCh)
       close(entriesCh)
+      fmt.Println("Host lookup via ZeroConf failed, rerun <host> <port>")
       os.Exit(0)
     } else if len(c.Args()) == 2 {
       serverAddress = c.Args()[0] + ":" + c.Args()[1]
